@@ -3,6 +3,7 @@ import sys
 
 from PyQt6.QtWidgets import QMainWindow, QApplication
 
+from events import EventHandlerEdit
 from gui import Ui_main_window
 
 
@@ -10,6 +11,19 @@ class MyWindow(QMainWindow, Ui_main_window):
     def __init__(self):
         super().__init__()
         self.setupUi(self)
+        self.event = EventHandlerEdit(self)
+        self.initialize_events()
+
+    def initialize_events(self):
+        # self.scrap_button.clicked.connect(self.get_info_from_url)
+        self.add_vinyl_button.clicked.connect(self.event.add_vinyl)
+        self.save_vinyl_button.clicked.connect(self.event.save_edited_record)
+        self.delete_vinyl_button.clicked.connect(self.event.delete_vinyl_dialog)
+        self.edit_vinyl_all_button.clicked.connect(self.event.edit_multiple_records)
+        self.edit_vinyl_single_button.clicked.connect(self.event.edit_record)
+        self.edit_vinyl_from_number_button.clicked.connect(self.event.edit_from_number)
+        self.load_json_button_edit.clicked.connect(self.event.load_csv)
+        self.save_json_button_edit.clicked.connect(self.event.save_csv)
 
 
 def run_main():
