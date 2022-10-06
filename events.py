@@ -6,10 +6,12 @@ from PyQt6.QtGui import QIcon, QImage, QPixmap
 from PyQt6.QtCore import QCoreApplication, QEventLoop, Qt
 
 from csv_handler import load_csv, save_csv
+from functions import ScrappingFunctions
+from gui import Ui_main_window
 
 
 class EventHandlerEdit:
-    def __init__(self, main_window):
+    def __init__(self, main_window: Ui_main_window):
         super().__init__()
         self.main_window = main_window
         self.start_directory = r'D:\PŁYTY'
@@ -52,7 +54,8 @@ class EventHandlerEdit:
 
     def clear_input(self) -> None:
         for line_input in self.line_inputs:
-            line_input.clear()
+            if line_input.isEnabled():
+                line_input.clear()
 
     def check_selection(self) -> list:
         temp_list = list()
@@ -240,24 +243,24 @@ class EventHandlerEdit:
                              transformMode=Qt.TransformationMode.SmoothTransformation)
         self.main_window.vinyl_image_label_edit.setPixmap(QPixmap.fromImage(image))
 
-    # def get_info_from_url(self):
-    #     url = self.text_url.text()
-    #     if not url:
-    #         information_dialog('Wprowadź link', 'Uwaga', icon_path=self.icon_path)
-    #     else:
-    #         scrap = ScrappingFunctions(url)
-    #         scrap.get_information()
-    #         if scrap.data is not None:
-    #             self.clear_input()
-    #             self.text_artist.setText(scrap.information_dict['artist'])
-    #             self.text_title.setText(scrap.information_dict['title'])
-    #             self.text_year.setText(scrap.information_dict['year'])
-    #             self.text_category.setText(scrap.information_dict['genre'])
-    #             self.text_records.setText(scrap.information_dict['record'])
-    #             self.text_url.clear()
-    #         else:
-    #             information_dialog('Wprowadzono błędny link', 'Uwaga', icon_path=self.icon_path)
-    #             self.text_url.clear()
+    def scrap_data(self):
+        url = self.main_window.url_input_edit.text()
+        if not url:
+            information_dialog('Wprowadź link', 'Uwaga', icon_path=self.icon_path)
+        else:
+            scrap = ScrappingFunctions(url)
+            scrap.get_information()
+            if scrap.data is not None:
+                self.clear_input()
+                self.main_window.artist_input_edit.setText(scrap.information_dict['artist'])
+                self.main_window.title_input_edit.setText(scrap.information_dict['title'])
+                self.main_window.year_input_edit.setText(scrap.information_dict['year'])
+                self.main_window.category_input_edit.setText(scrap.information_dict['genre'])
+                self.main_window.records_input_edit.setText(scrap.information_dict['record'])
+                self.main_window.url_input_edit.clear()
+            else:
+                information_dialog('Wprowadzono błędny link', 'Uwaga', icon_path=self.icon_path)
+                self.main_window.url_input_edit.clear()
 
 
 def information_dialog(information: str, title: str, icon_path: Optional[str] = None):

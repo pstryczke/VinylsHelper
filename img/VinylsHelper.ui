@@ -463,7 +463,7 @@
          <string>Link</string>
         </property>
        </widget>
-       <widget class="QLineEdit" name="number_input_edit">
+       <widget class="QLineEdit" name="url_input_edit">
         <property name="enabled">
          <bool>true</bool>
         </property>

@@ -15,7 +15,7 @@ class MyWindow(QMainWindow, Ui_main_window):
         self.initialize_events()
 
     def initialize_events(self):
-        # self.scrap_button.clicked.connect(self.get_info_from_url)
+        self.scrap_button.clicked.connect(self.event.scrap_data)
         self.table_widget_edit.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
         self.previous_image_button.clicked.connect(self.event.clicked_previous_button)
         self.next_image_button.clicked.connect(self.event.clicked_next_button)
