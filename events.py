@@ -1,8 +1,9 @@
+import os
 from typing import Optional, List, Iterable
 
 from PyQt6.QtWidgets import QTableWidgetItem, QFileDialog, QMessageBox
-from PyQt6.QtGui import QIcon
-from PyQt6.QtCore import QCoreApplication, QEventLoop
+from PyQt6.QtGui import QIcon, QImage, QPixmap
+from PyQt6.QtCore import QCoreApplication, QEventLoop, Qt
 
 from csv_handler import load_csv, save_csv
 
@@ -11,9 +12,13 @@ class EventHandlerEdit:
     def __init__(self, main_window):
         super().__init__()
         self.main_window = main_window
-        self.init_path = r'D:\PŁYTY'
+        self.start_directory = r'D:\PŁYTY'
         self.icon_path = 'data/vinyl.ico'
         self.edit_flag = False
+        self.current_image = 0
+        self.images_dir = None
+        self.images_list = None
+        self.current_image_dir = None
         self.current_row_count = 0
         self.loop = QEventLoop()
         self.line_inputs = (
@@ -26,6 +31,7 @@ class EventHandlerEdit:
             self.main_window.cover_input_edit,
             self.main_window.information_input_edit,
             self.main_window.price_input_edit,
+            self.main_window.image_name_input,
         )
 
     def add_vinyl(self) -> None:
@@ -35,6 +41,7 @@ class EventHandlerEdit:
         self.clear_input()
         self.current_row_count = self.main_window.table_widget_edit.rowCount()
         self.main_window.table_widget_edit.scrollToBottom()
+        self.clicked_next_button()
         self.make_backup()
 
     def edit_vinyl(self, selected_row: int) -> None:
@@ -69,12 +76,14 @@ class EventHandlerEdit:
         save_csv('backup.csv', self.parse_from_table())
 
     def save_csv(self):
-        path = QFileDialog.getSaveFileName(self.main_window.central_widget, 'Save File', self.init_path, 'CSV(*.csv)')
+        path = QFileDialog.getSaveFileName(self.main_window.central_widget,
+                                           'Save File', self.start_directory, 'CSV(*.csv)')
         if path[0]:
             save_csv(path[0], self.parse_from_table())
 
     def load_csv(self):
-        path = QFileDialog.getOpenFileName(self.main_window.central_widget, 'Open File', self.init_path, 'CSV(*.csv)')
+        path = QFileDialog.getOpenFileName(self.main_window.central_widget,
+                                           'Open File', self.start_directory, 'CSV(*.csv)')
         if path[0]:
             self.parse_to_table(load_csv(path[0]))
 
@@ -86,7 +95,7 @@ class EventHandlerEdit:
                 try:
                     item = self.main_window.table_widget_edit.item(row, column)
                     row_data.append(item.text())
-                except AttributeError as e:
+                except AttributeError:
                     row_data.append('')
             all_data.append(row_data)
         return all_data
@@ -114,10 +123,11 @@ class EventHandlerEdit:
                 return None
         self.edit_flag = True
         self.insert_selected_from_table(selected_row)
+        self.main_window.table_widget_edit.selectRow(selected_row)
         self.change_buttons()
 
     def save_edited_record(self, current_row: Optional[int] = None) -> None:
-        if current_row:
+        if current_row is not None:
             selected_row = current_row
         else:
             selected_row = self.check_selection()[0]
@@ -144,7 +154,7 @@ class EventHandlerEdit:
                 from_number = 0
             for row in range(from_number, self.main_window.table_widget_edit.rowCount()):
                 self.edit_record(row)
-                self.loop.exec_()
+                self.loop.exec()
                 if not self.edit_flag:
                     break
                 self.save_edited_record(row)
@@ -161,7 +171,7 @@ class EventHandlerEdit:
 
     def change_buttons(self) -> None:
         _translate = QCoreApplication.translate
-        button_text = "Anuluj edycje" if self.edit_flag else "Edytuj wszystkie"
+        button_text = "Anuluj edycje" if self.edit_flag else "Wszystkie"
         self.main_window.add_vinyl_button.setEnabled(not self.edit_flag)
         self.main_window.delete_vinyl_button.setEnabled(not self.edit_flag)
         self.main_window.save_vinyl_button.setEnabled(self.edit_flag)
@@ -185,6 +195,50 @@ class EventHandlerEdit:
         return_value = msg_box.exec()
         if return_value == QMessageBox.StandardButton.Yes:
             self.delete_vinyl()
+            
+    def clicked_previous_button(self):
+        self.current_image -= 1 if self.current_image > 0 else 0
+        self.show_image()
+
+    def clicked_next_button(self):
+        if self.images_list:
+            self.current_image += 1 if self.current_image < len(self.images_list) - 1 else 0
+        self.show_image()
+    
+    def clicked_table_row(self):
+        selected_row = self.check_selection()[0]
+        image = self.main_window.table_widget_edit.item(selected_row, 9).text()
+        self.show_image(image)
+        
+    def load_images(self):
+        information = 'Wczytaj folder ze zdjęciami'
+        path = QFileDialog.getExistingDirectory(self.main_window.central_widget, information, self.start_directory)
+        if path:
+            self.images_dir = path
+            self.images_list = self._get_images_list()
+        self._show_image()
+
+    def _get_images_list(self):
+        images_list = list()
+        for file in os.listdir(self.images_dir):
+            if file.split('.')[-1] in ('jpg', 'png', 'bmp'):
+                images_list.append(file)
+        return images_list
+
+    def show_image(self, image_name: Optional[str] = None) -> None:
+        if self.images_dir and self.images_list:
+            self._show_image(image_name)
+        else:
+            information_dialog('Nie wybrano folderu ze zdjęciami!', 'Uwaga', icon_path=self.icon_path)
+
+    def _show_image(self, image_name: Optional[str] = None) -> None:
+        self.main_window.image_name_input.setText(self.images_list[self.current_image])
+        image_name = self.images_list[self.current_image] if image_name is None else image_name
+        current_image_dir = os.path.join(self.images_dir, image_name)
+        image = QImage(current_image_dir)
+        image = image.scaled(428, 321, aspectRatioMode=Qt.AspectRatioMode.KeepAspectRatio,
+                             transformMode=Qt.TransformationMode.SmoothTransformation)
+        self.main_window.vinyl_image_label_edit.setPixmap(QPixmap.fromImage(image))
 
     # def get_info_from_url(self):
     #     url = self.text_url.text()

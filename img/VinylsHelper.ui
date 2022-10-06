@@ -778,7 +778,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="load_json_button_edit">
+        <widget class="QPushButton" name="load_csv_button_edit">
          <property name="layoutDirection">
           <enum>Qt::LeftToRight</enum>
          </property>
@@ -788,7 +788,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="save_json_button_edit">
+        <widget class="QPushButton" name="save_csv_button_edit">
          <property name="text">
           <string> Zapisz Listę </string>
          </property>
@@ -812,6 +812,26 @@
        <bool>true</bool>
       </property>
      </widget>
+     <widget class="QLineEdit" name="image_name_input">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>380</y>
+        <width>221</width>
+        <height>20</height>
+       </rect>
+      </property>
+     </widget>
+     <zorder>vinyl_image_label_edit</zorder>
+     <zorder>image_name_input</zorder>
+     <zorder>line_10</zorder>
+     <zorder>frame_info_2</zorder>
+     <zorder>table_widget_edit</zorder>
+     <zorder>line_15</zorder>
+     <zorder>horizontalLayoutWidget_7</zorder>
     </widget>
     <widget class="QWidget" name="tab_2">
      <attribute name="title">
