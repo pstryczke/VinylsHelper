@@ -12,9 +12,9 @@ class MyWindow(QMainWindow, Ui_main_window):
         super().__init__()
         self.setupUi(self)
         self.event = EventHandlerEdit(self)
-        self.initialize_events()
+        self.initialize_edit_events()
 
-    def initialize_events(self):
+    def initialize_edit_events(self):
         self.scrap_button.clicked.connect(self.event.scrap_data)
         self.table_widget_edit.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
         self.previous_image_button.clicked.connect(self.event.clicked_previous_button)
