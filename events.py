@@ -119,8 +119,8 @@ class EventHandlerEdit:
                     self.main_window.table_widget_edit.setItem(row, len(row_data) + idx, item)
         self.current_row_count = self.main_window.table_widget_edit.rowCount()
 
-    def edit_record(self, current_row: Optional[int] = None) -> None:
-        if current_row is not False:
+    def edit_record(self, current_row: Optional[int] = False) -> None:
+        if current_row and not isinstance(current_row, bool):
             selected_row = current_row
         else:
             if self.check_selection():
@@ -133,8 +133,8 @@ class EventHandlerEdit:
         self.main_window.table_widget_edit.selectRow(selected_row)
         self.change_buttons()
 
-    def save_edited_record(self, current_row: Optional[int] = None) -> None:
-        if current_row is not None:
+    def save_edited_record(self, current_row: Optional[int] = False) -> None:
+        if current_row and not isinstance(current_row, bool):
             selected_row = current_row
         else:
             selected_row = self.check_selection()[0]
