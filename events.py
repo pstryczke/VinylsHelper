@@ -15,7 +15,7 @@ class EventHandlerEdit:
         super().__init__()
         self.main_window = main_window
         self.start_directory = r'D:\PŁYTY'
-        self.icon_path = 'data/vinyl.ico'
+        self.icon_path = '../discogs_ml/data/vinyl.ico'
         self.edit_flag = False
         self.current_image = 0
         self.images_dir = None
@@ -109,10 +109,14 @@ class EventHandlerEdit:
             self.main_window.table_widget_edit.scrollToBottom()
             row = self.main_window.table_widget_edit.rowCount()
             self.main_window.table_widget_edit.insertRow(row)
-            self.main_window.table_widget_edit.setColumnCount(len(row_data))
+            self.main_window.table_widget_edit.setColumnCount(len(self.line_inputs))
             for column, data in enumerate(row_data):
                 item = QTableWidgetItem(data)
                 self.main_window.table_widget_edit.setItem(row, column, item)
+            if len(row_data) < len(self.line_inputs):
+                for idx in range(len(self.line_inputs) - len(row_data)):
+                    item = QTableWidgetItem()
+                    self.main_window.table_widget_edit.setItem(row, len(row_data) + idx, item)
         self.current_row_count = self.main_window.table_widget_edit.rowCount()
 
     def edit_record(self, current_row: Optional[int] = None) -> None:
@@ -210,8 +214,9 @@ class EventHandlerEdit:
     
     def clicked_table_row(self):
         selected_row = self.check_selection()[0]
-        image = self.main_window.table_widget_edit.item(selected_row, 9).text()
-        self.show_image(image)
+        if self.main_window.table_widget_edit.columnCount() == 9:
+            image = self.main_window.table_widget_edit.item(selected_row, 9).text()
+            self.show_image(image)
         
     def load_images(self):
         information = 'Wczytaj folder ze zdjęciami'
@@ -219,7 +224,7 @@ class EventHandlerEdit:
         if path:
             self.images_dir = path
             self.images_list = self._get_images_list()
-        self._show_image()
+            self._show_image()
 
     def _get_images_list(self):
         images_list = list()
